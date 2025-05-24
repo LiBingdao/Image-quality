@@ -1,1 +1,131 @@
+% 设置图像尺寸
+clc
+clear all
+close all
+imgSize = 1024;
+
+% 创建 a-b 网格（从 -128 到 127）
+[a, b] = meshgrid(linspace(-128, 127, imgSize), linspace(127, -128, imgSize));
+
+% 固定 L 值
+inGamutMask = false(imgSize,imgSize);
+i = 1;
+for LL = 1:300
+    i =i+1
+    LL = LL/3.0;
+    L = LL * ones(size(a));
+
+    % 组合成 LAB 图像
+    lab_img = cat(3, L, a, b);
+    [H,W,C] = size(lab_img);
+    lab_img = reshape(lab_img,[],3);
+
+    rgb = lab2rgb(lab_img,'OutputType','double');
+    rgb =reshape(rgb,[H,W,C] );
+    inGamutMask = all(rgb >= 0 & rgb <= 1, 3)|inGamutMask;
+end
+L = 70 * ones(size(a));
+
+% 组合成 LAB 图像
+lab_img = cat(3, L, a, b);
+[H,W,C] = size(lab_img);
+lab_img = reshape(lab_img,[],3);
+rgb = lab2rgb(lab_img,'OutputType','double');
+rgb =reshape(rgb,[H,W,C] );
+imshow(rgb)
+
+hold on;
+% 用 bwboundaries 找边界
+boundaries = bwboundaries(inGamutMask);
+for k = 1:length(boundaries)
+    boundary = boundaries{k};
+    plot(boundary(:,2), boundary(:,1), 'w', 'LineWidth', 1.5);  % 注意 x = col, y = row
+%     for j = 1:size(boundary)
+%         rgb(boundary(j,1), boundary(j,2),:) = [1,1,1];
+%     end
+end
+rgb = uint8(rgb*255);
+
+hold on;
+
+% 设置中心点
+[height, width, ~] = size(rgb);
+cx = width / 2;
+cy = height / 2;
+% for k = 1:imgSize
+%     rgb(k,cy,:) = [50,50,50];
+%     rgb(k,cy+1,:) = [50,50,50];
+%     rgb(k,cy-1,:) = [50,50,50];
+%     rgb(cx,k,:) = [50,50,50];
+%     rgb(cx+1,k,:) = [50,50,50];
+%     rgb(cx-1,k,:) = [50,50,50];
+% end
+% imwrite(rgb,'CIELAB_L70_sRGB')
+
+
+
+
+
+% 设置虚线样式
+lineStyle = ':';       % 虚线
+lineWidth = 1;        % 线宽
+lineColor =[0.5,0.5,0.5];        % 白色，可改为 'r', 'g', [1 0 0], etc.
+% 水平虚线
+line([1, width], [cy, cy], 'Color', [0.5,0.5,0.5], 'LineStyle', lineStyle, 'LineWidth', lineWidth);
+% 垂直虚线
+line([cx, cx], [1, height], 'Color', [0.5,0.5,0.5], 'LineStyle', lineStyle, 'LineWidth', lineWidth);
+axis off;
+set(gca,'Position',[0 0 1 1]);
+set(gca,'Color','black');
+% print(gcf,'clean_output','-dpng','-r300');
+
+F = getframe(gca);
+[size_a,size_b,size_x] = size(F.cdata);
+imwrite(F.cdata(size_a*14/128:size_a*114/128,size_a*14/128:size_a*114/128,:),'output.png');
+hold off;
+
+% xlabel('a*');
+% ylabel('b*');
+% title('CIELAB a-b Plane at L=75 (2048x2048)');
+% grid on;
+% numTicks = 9;
+% tickVals = round(linspace(-128, 127, numTicks));
+% ax.XTick = tickVals;
+% ax.YTick = tickVals;
+
+[xyz] = lab2xyz(lab_img,'d65_64');
+xyz =reshape(xyz,[H,W,C] );
+xyz = xyz/100;
+xyz = reshape(xyz,[],3);
+
+srgb = xyz2srgb(xyz);
+srgb =reshape(srgb,[H,W,C] );
+srgb = uint8(srgb);
+% 转换为 RGB 图像（[0,1] double -> uint8）
+rgb_img = lab2rgb(lab_img);
+rgb_img = im2uint8(rgb_img);  % 确保 imwrite 正常
+rgb_img =reshape(rgb_img,[H,W,C] );
+rgb_img = uint8(rgb_img);
+% 显示图像（改用 imagesc 显示并启用坐标轴）
+figure('Position', [100, 100, 800, 800]);
+imagesc(linspace(-128, 127, imgSize), linspace(-128, 127, imgSize), rgb_img);
+axis image;
+set(gca, 'YDir', 'normal'); % 防止Y轴颠倒
+xlabel('a*');
+ylabel('b*');
+title('CIE LAB a-b Plane at L=75 (2048x2048)');
+grid on;
+ax = gca;
+ax.GridColor = [0.5, 0.5, 0.5];
+ax.GridAlpha = 0.4;
+
+% 添加坐标轴刻度（可自定义密度）
+numTicks = 9;
+tickVals = round(linspace(-128, 127, numTicks));
+ax.XTick = tickVals;
+ax.YTick = tickVals;
+grid off;
+% 保存为包含坐标轴的图片
+exportgraphics(gcf, 'lab_ab_plane_2048_with_axes.png');
+disp('图像已保存：lab_ab_plane_2048_with_axes.png');
 
