@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>图像质量分析平台</title>
+
+  <link rel="stylesheet" href="./css/style.css" />
+  <style>
+    /* 色卡参数面板样式 */
+    #colorCheckerParams label {
+      display: block;
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+    #colorCheckerParams select {
+      padding: 8px 12px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 14px;
+      background: #fff;
+      min-width: 160px;
+    }
+    /* 结果表格样式 */
+    .color-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      margin-top: 12px;
+    }
+    .color-table th {
+      background: #f0f4ff;
+      padding: 10px 8px;
+      text-align: left;
+      border-bottom: 2px solid var(--primary);
+      font-weight: 600;
+    }
+    .color-table td {
+      padding: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .color-table tr:hover {
+      background: #f8fafc;
+    }
+    .delta-e-high { color: #dc2626; font-weight: bold; }
+    .delta-e-mid  { color: #ea580c; }
+    .delta-e-low  { color: #16a34a; }
+    /* 色块预览 */
+    .color-swatch {
+      display: inline-block;
+      width: 24px;
+      height: 24px;
+      border-radius: 4px;
+      border: 1px solid #ddd;
+      vertical-align: middle;
+      margin-right: 6px;
+    }
+    /* 统计卡片 */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    .stat-card {
+      background: #f8fafc;
+      border-radius: 10px;
+      padding: 16px;
+      text-align: center;
+    }
+    .stat-card .value {
+      font-size: 28px;
+      font-weight: bold;
+      color: var(--primary);
+    }
+    .stat-card .label {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+  </style>
+</head>
+
+<body>
+  <header class="site-header">
+    <div class="page-container">
+      <h1>图像质量分析平台</h1>
+      <p>选择算法 → 上传图像 → 选取 ROI → 输出测试结果</p>
+    </div>
+  </header>
+
+  <main class="page-container">
+    <section class="algorithm-section">
+      <div class="section-heading">
+        <div>
+          <h2>选择分析模型</h2>
+        </div>
+      </div>
+
+      <div class="algorithm-grid" id="algorithmGrid">
+        <button class="algorithm-card" data-algorithm="slantedEdge" type="button">
+          <span class="algorithm-icon">╱</span>
+          <strong>斜边</strong>
+          <small>ESF · LSF · MTF</small>
+        </button>
+
+        <button class="algorithm-card" data-algorithm="siemensStar" type="button">
+          <span class="algorithm-icon">✺</span>
+          <strong>星图</strong>
+          <small>径向 MTF · 分辨率</small>
+        </button>
+
+        <button class="algorithm-card" data-algorithm="deadLeaves" type="button">
+          <span class="algorithm-icon">◌</span>
+          <strong>枯叶图</strong>
+          <small>纹理 · 降噪 · 锐化</small>
+        </button>
+
+        <button class="algorithm-card" data-algorithm="linePairs" type="button">
+          <span class="algorithm-icon">▥</span>
+          <strong>线对</strong>
+          <small>分辨率 · 对比度</small>
+        </button>
+
+        <button class="algorithm-card" data-algorithm="colorChecker" type="button">
+          <span class="algorithm-icon">▦</span>
+          <strong>24 色卡</strong>
+          <small>色差 · 白平衡 · 饱和度</small>
+        </button>
+
+        <button class="algorithm-card" data-algorithm="grayScale" type="button">
+          <span class="algorithm-icon">▤</span>
+          <strong>灰阶</strong>
+          <small>Gamma · 动态范围</small>
+        </button>
+
+        <button class="algorithm-card" data-algorithm="checkerboard" type="button">
+          <span class="algorithm-icon">▦</span>
+          <strong>棋盘格</strong>
+          <small>畸变 · 标定 · 角点</small>
+        </button>
+
+        <button class="algorithm-card" data-algorithm="uniformity" type="button">
+          <span class="algorithm-icon">▧</span>
+          <strong>均匀性</strong>
+          <small>亮度 · 色彩 · 暗角</small>
+        </button>
+      </div>
+    </section>
+
+    <section class="workspace hidden" id="workspace">
+      <div class="workspace-header">
+        <div>
+          <h2 id="algorithmTitle">分析工作区</h2>
+          <p id="algorithmDescription">请选择一个分析模型。</p>
+        </div>
+
+        <button id="backButton" class="button button-secondary" type="button">
+          返回模型列表
+        </button>
+      </div>
+
+      <!-- 24 色卡专用参数面板（仅色卡模式显示） -->
+      <section class="panel" id="colorCheckerParams" style="display:none;">
+        <h3>色卡分析参数</h3>
+        <div class="toolbar" style="gap:24px;align-items:flex-end;flex-wrap:wrap;">
+          <div>
+            <label for="colorSpaceSelect">色彩空间</label>
+            <select id="colorSpaceSelect">
+              <option value="sRGB" selected>sRGB</option>
+              <option value="Adobe RGB">Adobe RGB</option>
+              <option value="Display P3">Display P3</option>
+            </select>
+          </div>
+          <div>
+            <label for="whitePointSelect">白点</label>
+            <select id="whitePointSelect">
+              <option value="D65" selected>D65</option>
+              <option value="D50">D50</option>
+              <option value="C">C</option>
+            </select>
+          </div>
+        </div>
+        
+        <!-- 色卡参考文件管理 -->
+        <div id="refManagement" style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border);">
+          <h4 style="margin:0 0 12px 0;font-size:14px;">色卡参考值管理</h4>
+          <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+            <button id="loadRefButton" class="button button-secondary" type="button" style="min-height:32px;padding:6px 12px;font-size:13px;">
+              查看参考值
+            </button>
+            <input id="refFileInput" type="file" accept=".json" style="display:none;" />
+            <button id="uploadRefButton" class="button button-secondary" type="button" style="min-height:32px;padding:6px 12px;font-size:13px;">
+              上传自定义参考值
+            </button>
+            <a href="http://localhost:8000/api/reference/colorchecker/download" onclick="event.preventDefault(); window.open(this.href, '_blank');" class="button button-secondary" style="min-height:32px;padding:6px 12px;font-size:13px;text-decoration:none;display:inline-flex;align-items:center;">
+              下载参考值 JSON
+            </a>
+          </div>
+          <p class="hint" style="margin:8px 0 0 0;font-size:12px;">
+            支持上传自定义 JSON 参考文件，格式与下载文件相同。
+          </p>
+          <!-- 参考值显示区域 -->
+          <div id="refTableContainer" style="margin-top:16px;"></div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="toolbar">
+          <input id="imageInput" type="file" accept="image/*" />
+
+          <button id="clearRoiButton" class="button button-secondary" type="button" disabled>
+            清除 ROI
+          </button>
+
+          <button id="analyzeButton" class="button" type="button" disabled>
+            开始分析
+          </button>
+        </div>
+      </section>
+
+      <section class="workspace-grid">
+        <div class="panel">
+          <h3>图片与 ROI</h3>
+          <p class="hint" id="roiHint">
+            上传图片后，用鼠标拖动框选分析区域。
+          </p>
+
+          <div class="canvas-wrapper">
+            <canvas id="imageCanvas"></canvas>
+          </div>
+        </div>
+
+        <aside class="panel">
+          <h3>分析状态</h3>
+          <div class="status-box" id="statusBox">
+            请选择模型并上传图片。
+          </div>
+
+          <h3 class="output-heading">预期输出</h3>
+          <div class="output-list" id="expectedOutputs"></div>
+        </aside>
+      </section>
+
+      <section class="panel">
+        <h3>结果区域</h3>
+
+        <div id="resultContainer" class="result-container">
+          <p class="empty-text">选择模型、上传图像并框选 ROI 后，分析结果将在此显示。</p>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <script src="./app.js"></script>
+</body>
+</html>
