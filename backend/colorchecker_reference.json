@@ -1,0 +1,30 @@
+{
+  "name": "ColorChecker Classic (ColorBaby)",
+  "description": "X-Rite ColorChecker Classic 标准参考值，sRGB D65 色彩空间",
+  "patches": [
+    {"index": 1,  "name": "Dark Skin",      "rgb": [115, 82, 68],   "lab": [37.54, 12.36, 13.92]},
+    {"index": 2,  "name": "Light Skin",     "rgb": [194, 150, 130], "lab": [64.30, 18.14, 17.81]},
+    {"index": 3,  "name": "Blue Sky",       "rgb": [98, 122, 157],  "lab": [49.54, -4.37, -21.57]},
+    {"index": 4,  "name": "Foliage",        "rgb": [87, 108, 67],   "lab": [43.27, -14.56, 26.87]},
+    {"index": 5,  "name": "Blue Flower",    "rgb": [133, 128, 177], "lab": [55.03, 10.92, -21.73]},
+    {"index": 6,  "name": "Bluish Green",   "rgb": [103, 189, 170], "lab": [71.37, -32.14, 2.31]},
+    {"index": 7,  "name": "Orange",         "rgb": [214, 126, 44],  "lab": [60.47, 35.20, 50.27]},
+    {"index": 8,  "name": "Purplish Blue",  "rgb": [80, 91, 166],   "lab": [40.14, 10.52, -45.63]},
+    {"index": 9,  "name": "Moderate Red",   "rgb": [193, 90, 99],   "lab": [50.29, 42.79, 14.13]},
+    {"index": 10, "name": "Purple",         "rgb": [94, 60, 108],   "lab": [30.33, 21.79, -20.45]},
+    {"index": 11, "name": "Yellow Green",   "rgb": [157, 188, 64],  "lab": [71.77, -24.77, 59.18]},
+    {"index": 12, "name": "Orange Yellow",  "rgb": [224, 163, 46],  "lab": [72.24, 18.85, 64.73]},
+    {"index": 13, "name": "Blue",           "rgb": [56, 61, 150],   "lab": [28.87, 18.14, -50.48]},
+    {"index": 14, "name": "Green",          "rgb": [70, 148, 73],   "lab": [54.96, -39.72, 33.30]},
+    {"index": 15, "name": "Red",            "rgb": [175, 54, 60],   "lab": [42.43, 51.09, 27.20]},
+    {"index": 16, "name": "Yellow",         "rgb": [231, 199, 31],  "lab": [81.32, 3.54, 77.87]},
+    {"index": 17, "name": "Magenta",        "rgb": [187, 86, 149],  "lab": [51.87, 48.64, -14.36]},
+    {"index": 18, "name": "Cyan",           "rgb": [8, 133, 161],   "lab": [50.63, -22.34, -32.34]},
+    {"index": 19, "name": "White",          "rgb": [243, 243, 242], "lab": [96.52, -0.43, 1.10]},
+    {"index": 20, "name": "Neutral 8",      "rgb": [200, 200, 200], "lab": [81.26, -0.64, -0.29]},
+    {"index": 21, "name": "Neutral 6.5",    "rgb": [160, 160, 160], "lab": [65.10, -0.70, -0.32]},
+    {"index": 22, "name": "Neutral 5",      "rgb": [122, 122, 121], "lab": [50.47, -0.56, -0.26]},
+    {"index": 23, "name": "Neutral 3.5",    "rgb": [85, 85, 85],    "lab": [35.21, -0.43, -0.21]},
+    {"index": 24, "name": "Black",          "rgb": [52, 52, 52],    "lab": [20.64, -0.28, -0.15]}
+  ]
+}
